@@ -1,11 +1,11 @@
 import * as React from 'react';
 import { createStackNavigator } from '@react-navigation/stack';
 
-import OnBoardScreen from '@app/screens/Onboard/Onboard.screen';
-import LoginScreen from '@app/screens/Login/Login.screen';
-import RoomScreen from '@app/screens/Room/Room.screen';
-import ChatScreen from '@app/screens/Chat/Chat.screen';
-import RegisterScreen from '@app/screens/Register/Register.screen';
+import ChatScreen from '@screens/Chat/Chat.screen';
+import RoomScreen from '@screens/Room/Room.screen';
+import LoginScreen from '@screens/Login/Login.screen';
+import OnBoardScreen from '@screens/Onboard/Onboard.screen';
+import RegisterScreen from '@screens/Register/Register.screen';
 
 const Stack = createStackNavigator();
 

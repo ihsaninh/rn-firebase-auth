@@ -3,7 +3,7 @@ import { View, StyleSheet, Text, Pressable } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { SvgXml } from 'react-native-svg';
 
-import IconIlustrasi from '@app/assets/images/ilustrasi.svg';
+import IconIlustrasi from '@assets/images/ilustrasi.svg';
 
 function OnBoardScreen({ navigation }) {
   const insets = useSafeAreaInsets();

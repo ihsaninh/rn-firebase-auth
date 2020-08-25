@@ -1,12 +1,21 @@
 import React, { useState } from 'react';
-import { View, Text, StyleSheet, Pressable, Alert } from 'react-native';
 import auth from '@react-native-firebase/auth';
+
+import { View, Text, Alert } from 'react-native';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { TextField } from '@ubaids/react-native-material-textfield';
 import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 
-const LoginScreen = ({ navigation }) => {
+import Button from '@components/button.component';
+
+import { validateEmail } from '../../utils/helper';
+import { Colors } from '../../utils/colors';
+import { styles } from './Login.style';
+
+function LoginScreen({ navigation }) {
+  const authRef = auth();
   const insets = useSafeAreaInsets();
+  const [inputErrors, setInputErrors] = useState({});
   const [userData, setUserData] = useState({
     email: '',
     password: '',
@@ -19,23 +28,50 @@ const LoginScreen = ({ navigation }) => {
     });
   };
 
+  const onFocus = (type) => () => {
+    setInputErrors({
+      ...inputErrors,
+      [type]: '',
+    });
+  };
+
   const onPressLogin = () => {
-    if (userData.email === '' || userData.password === '') {
-      Alert.alert('Diisi semua dulu bro');
-    } else {
-      auth()
-        .signInWithEmailAndPassword(userData.email, userData.password)
-        .then((res) => {
-          console.log(res);
-          setUserData({
-            ...userData,
-            email: '',
-            password: '',
-          });
-          navigation.navigate('Room');
-        })
-        .catch((error) => Alert.alert(error.message));
+    const { email, password } = userData;
+    let errors = {};
+    let error = false;
+
+    if (email === '') {
+      errors = {
+        ...errors,
+        email: 'Email tidak boleh kosong',
+      };
+      error = true;
+    } else if (!validateEmail(email)) {
+      errors = {
+        ...errors,
+        email: 'Format Email tidak valid',
+      };
+      error = true;
     }
+
+    if (password === '') {
+      errors = {
+        ...errors,
+        password: 'Password tidak boleh kosong',
+      };
+      error = true;
+    }
+
+    if (error) {
+      setInputErrors(errors);
+    }
+
+    authRef
+      .signInWithEmailAndPassword(email, password)
+      .then(() => {
+        navigation.navigate('Room');
+      })
+      .catch((err) => Alert.alert(err.message));
   };
 
   return (
@@ -46,9 +82,11 @@ const LoginScreen = ({ navigation }) => {
         labelTextStyle={styles.label}
         keyboardType="email-address"
         fontSize={14}
-        baseColor="rgba(75, 84, 97, 0.4)"
-        tintColor="#3AD29F"
+        baseColor={Colors.GREY}
+        tintColor={Colors.SHAMROCK}
         value={userData.email}
+        error={inputErrors.email}
+        onFocus={onFocus('email')}
         onChangeText={onChangeText('email')}
       />
       <View style={styles.space} />
@@ -56,24 +94,16 @@ const LoginScreen = ({ navigation }) => {
         label="Kata Sandi"
         labelTextStyle={styles.label}
         fontSize={14}
-        baseColor="rgba(75, 84, 97, 0.4)"
-        tintColor="#3AD29F"
+        baseColor={Colors.GREY}
+        tintColor={Colors.SHAMROCK}
         value={userData.password}
+        error={inputErrors.password}
+        onFocus={onFocus('password')}
         onChangeText={onChangeText('password')}
         secureTextEntry
       />
       <Text style={styles.forgot}>Lupa kata sandi?</Text>
-      <View style={styles.btnWrapper}>
-        <Pressable
-          onPress={onPressLogin}
-          android_ripple={{
-            color: 'rgba(0,0,0,0.2)',
-            borderless: false,
-          }}
-          style={({ pressed }) => [styles.btn(pressed)]}>
-          <Text style={styles.btnText}>Masuk</Text>
-        </Pressable>
-      </View>
+      <Button title="Masuk" onPress={onPressLogin} />
       <Text style={styles.signUp}>
         User baru bro?{' '}
         <Text
@@ -84,61 +114,6 @@ const LoginScreen = ({ navigation }) => {
       </Text>
     </KeyboardAwareScrollView>
   );
-};
+}
 
 export default LoginScreen;
-
-const styles = StyleSheet.create({
-  container: (insets) => ({
-    flex: 1,
-    backgroundColor: 'white',
-    paddingBottom: insets.bottom,
-    paddingTop: insets.top,
-    paddingHorizontal: 16,
-  }),
-  label: {
-    fontSize: 20,
-    color: 'blue',
-  },
-  greeting: {
-    paddingTop: 80,
-    paddingBottom: 40,
-    fontSize: 30,
-    fontWeight: '300',
-  },
-  space: {
-    height: 8,
-  },
-  forgot: {
-    textAlign: 'right',
-    paddingTop: 16,
-    fontWeight: '300',
-    color: '#3AD29F',
-  },
-  btnWrapper: {
-    marginTop: 48,
-    borderRadius: 6,
-    overflow: 'hidden',
-  },
-  btn: (pressed) => ({
-    backgroundColor: pressed ? 'rgba(58, 210, 159, 0.9)' : '#3AD29F',
-  }),
-  btnText: {
-    padding: 18,
-    textAlign: 'center',
-    color: 'white',
-    fontSize: 15,
-    fontWeight: '700',
-    textTransform: 'uppercase',
-  },
-  signUp: {
-    fontSize: 12,
-    textAlign: 'center',
-    paddingTop: 16,
-    color: 'rgba(75, 84, 97, 0.7)',
-    fontWeight: '300',
-  },
-  activeText: {
-    color: '#3AD29F',
-  },
-});
